@@ -3,7 +3,7 @@
  * Apps Script web app) when online. No server, no framework, no WebAssembly.
  *
  * >>> SET THIS to your Apps Script Web App URL (see apps-script/Code.gs) <<< */
-const ENDPOINT = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbyQD9yjFUV_3RG3YxZoMoW3Ju5hGoOGc_4m4OohE6bUWptKmUYa9JfkQrTz8safOLqR/exec";
 
 const CROPS   = ["Paddy/Rice","Pigeonpea","Groundnut","Finger millet (Ragi)","Blackgram","Greengram","Sesame","Other"];
 const CLASSES = ["Nucleus","Breeder","Foundation","Certified"];
