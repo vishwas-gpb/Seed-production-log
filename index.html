@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#2e7d32" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Seed Production Log</title>
+  <style>
+    :root { --green:#2e7d32; --green-d:#1b5e20; --bg:#f6f7f5; --card:#fff; --line:#e2e5e1; --muted:#5c6660; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+           background:var(--bg); color:#1c211e; }
+    header { position:sticky; top:0; z-index:5; background:var(--green); color:#fff;
+             padding:12px 16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    header h1 { font-size:18px; margin:0; flex:1; }
+    .pill { font-size:12px; padding:3px 9px; border-radius:999px; background:rgba(255,255,255,.2); }
+    .pill.off { background:#b71c1c; }
+    nav { display:flex; background:var(--card); border-bottom:1px solid var(--line); position:sticky; top:49px; z-index:4; }
+    nav button { flex:1; border:0; background:none; padding:12px; font-size:15px; color:var(--muted); cursor:pointer; border-bottom:3px solid transparent; }
+    nav button.active { color:var(--green-d); border-bottom-color:var(--green); font-weight:600; }
+    main { padding:16px; max-width:900px; margin:0 auto; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media (max-width:560px){ .grid { grid-template-columns:1fr; } }
+    label { display:block; font-size:13px; color:var(--muted); margin:0 0 4px; }
+    .req label::after { content:" *"; color:#b71c1c; }
+    input, select, textarea { width:100%; padding:10px; border:1px solid var(--line); border-radius:8px;
+             font-size:15px; background:#fff; }
+    input:focus, select:focus, textarea:focus { outline:2px solid var(--green); border-color:var(--green); }
+    .field { margin-bottom:2px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    button.btn { border:0; border-radius:8px; padding:11px 16px; font-size:15px; cursor:pointer; }
+    .btn.primary { background:var(--green); color:#fff; }
+    .btn.ghost { background:#fff; color:var(--green-d); border:1px solid var(--green); }
+    .btn.small { padding:7px 12px; font-size:13px; }
+    .btn.danger { background:#fff; color:#b71c1c; border:1px solid #e0b4b4; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px; }
+    .muted { color:var(--muted); font-size:13px; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); white-space:nowrap; }
+    th { color:var(--muted); font-weight:600; }
+    .tablewrap { overflow-x:auto; }
+    .toast { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:#222; color:#fff;
+             padding:10px 16px; border-radius:8px; font-size:14px; opacity:0; transition:opacity .2s; z-index:20; }
+    .toast.show { opacity:1; }
+    .hidden { display:none; }
+    .badge { display:inline-block; background:#fff3cd; color:#7a5b00; border-radius:6px; padding:2px 8px; font-size:12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Seed Production Log</h1>
+    <span id="net" class="pill">…</span>
+    <span id="count" class="pill">0 saved</span>
+  </header>
+
+  <nav>
+    <button id="tab-log" class="active" onclick="showView('log')">Log entry</button>
+    <button id="tab-rec" onclick="showView('rec')">Records</button>
+  </nav>
+
+  <main>
+    <!-- LOG VIEW -->
+    <section id="view-log">
+      <div class="grid">
+        <div class="field req"><label>Lot ID</label><input id="lot_id" placeholder="e.g. PDY-MTU1010-K26-001" /></div>
+        <div class="field req"><label>Crop</label>
+          <select id="crop"></select></div>
+        <div class="field req"><label>Variety</label><input id="variety" placeholder="e.g. MTU-1010" /></div>
+        <div class="field req"><label>Seed class</label><select id="seed_class"></select></div>
+        <div class="field req"><label>Season</label><select id="season"></select></div>
+        <div class="field req"><label>Year</label><input id="year" type="number" min="2020" max="2100" /></div>
+        <div class="field"><label>Source seed lot no.</label><input id="source_lot" /></div>
+        <div class="field"><label>Source seed class</label><select id="source_class"></select></div>
+        <div class="field req"><label>Area (ha)</label><input id="area_ha" type="number" step="0.1" min="0" /></div>
+        <div class="field"><label>District</label><input id="district" /></div>
+        <div class="field"><label>Block</label><input id="block" /></div>
+        <div class="field"><label>Village</label><input id="village" /></div>
+        <div class="field"><label>GPS latitude</label><input id="lat" type="number" step="0.00001" /></div>
+        <div class="field"><label>GPS longitude</label><input id="lon" type="number" step="0.00001" /></div>
+        <div class="field"><label>Sowing date</label><input id="sowing_date" type="date" /></div>
+        <div class="field"><label>Grower name</label><input id="grower" /></div>
+        <div class="field"><label>Grower reg / KYC ref</label><input id="grower_ref" /></div>
+      </div>
+      <div class="row">
+        <button class="btn ghost small" onclick="useGPS()">Use device GPS</button>
+      </div>
+      <div class="field" style="margin-top:14px"><label>Notes</label><textarea id="notes" rows="2"></textarea></div>
+      <div class="row">
+        <button class="btn primary" onclick="saveRecord()">Save record</button>
+        <button class="btn ghost" onclick="clearForm()">Clear form</button>
+      </div>
+    </section>
+
+    <!-- RECORDS VIEW -->
+    <section id="view-rec" class="hidden">
+      <div class="card" style="margin-bottom:14px">
+        <div class="row" style="margin-top:0; align-items:center">
+          <span id="unsynced" class="badge">0 not yet uploaded</span>
+          <button class="btn primary small" onclick="syncNow(true)">Sync now</button>
+          <button class="btn ghost small" onclick="exportCSV()">Export CSV</button>
+        </div>
+        <p class="muted" style="margin:10px 0 0">Records are saved on this device and uploaded to your Google Sheet automatically when online. Export CSV any time as a backup.</p>
+      </div>
+      <div class="tablewrap card">
+        <table>
+          <thead><tr><th></th><th>Lot ID</th><th>Crop</th><th>Variety</th><th>Class</th><th>Season</th><th>Area</th><th>Status</th><th></th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
